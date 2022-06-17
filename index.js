@@ -14,61 +14,20 @@ mongoose.connect('mongodb://127.0.0.1:27017/apis', (err) => {
     else console.log('Error In MongoDB Connection : ', JSON.stringify(err, undefined, 2));
 });
 
-// modal schema
-let List = require('./modal');
+// router
+const router = require('./routers/list_router');
 
-// routers
-app.get('/list',async (req, res) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    try {
-        var result = await List.find().exec();
-        res.send(result);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-})
-app.get('/list/:id',async (req, res) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    try {
-        var order = await List.findById(req.params.id).exec();
-        res.send(order);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-})
-app.delete('/list/:id',async (req, res) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    try {
-        var result = await List.deleteOne({ _id: req.params.id }).exec();
-        res.send(result);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-})
-app.patch('/list/:id',async (req, res) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    try {
-        var list = await List.findById(req.params.id).exec();
-        list.set(req.body);
-        var result = await List.save();
-        res.send(result);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-})
-app.post('/createList', async (req, res) => {
-    console.log(req.body)
-    res.header("Access-Control-Allow-Origin", "*");
-    try {
-        var list = new List(req.body);
-        var result = await list.save();
-        res.send(result);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-})
+// res.header("Access-Control-Allow-Origin", "*");
 
+var allowCrossDomain = (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+}
 app.use(core());
+app.use('/',[allowCrossDomain], router)
+
 
 // server port
 server.listen( port, () => {
